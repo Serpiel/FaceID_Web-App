@@ -12,8 +12,7 @@ def verifier_visage(email, base64_image_live, image_reference_filename):
     if not os.path.exists(chemin_image_ref):
         return False, "Image de référence introuvable sur le serveur."
 
-    # Initialiser le client AWS Rekognition
-    # Il utilise les mêmes clés AWS que DynamoDB (déjà dans votre .env)
+    # Utilisation de rekognition : IA provenant de AWS afin de comparer deux images (pratique ici donc pour le face auth)
     rekognition = boto3.client('rekognition', 
         region_name='eu-west-1', # L'IA de AWS fonctionne que sur cette région, askip c'est le hub de l'Europe (Irlande)
         aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),

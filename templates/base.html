@@ -24,7 +24,7 @@
         {% if messages %}
             <ul>
                 {% for category, message in messages %}
-                    <li style="color:{% if category == 'error' %}red{% else %}green{% endif %};">
+                    <li style="color:{% if category == 'error' %}red{% else %}green{% endif %};"> <!-- Ignorer les erreurs, c'est que de la syntaxe, CSS pète un peu un câble-->
                         {{ message }}
                     </li>
                 {% endfor %}
