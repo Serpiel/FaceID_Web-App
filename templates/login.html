@@ -2,18 +2,33 @@
 
 {% block content %}
     <h2>Se connecter</h2>
-    
-    <form method="POST" action="{{ url_for('login') }}">
-        <div>
-            <label for="email">Email :</label><br>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <br>
-        <div>
-            <label for="password">Mot de passe :</label><br>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <br>
-        <button type="submit">Connexion</button>
-    </form>
+    <div>
+        <form method="POST" action="{{ url_for('login') }}">
+            <div>
+                <label for="email">Email :</label><br>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <br>
+            <div>
+                <label for="password">Mot de passe :</label><br>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <br>
+            <button type="submit">Connexion</button>
+        </form>
+
+        <p>Ou utilisez l'autre méthode :</p>
+
+        <button type="button" onclick="goToFaceLogin()">
+            Se connecter par Reconnaissance Faciale
+        </button>
+    </div>
+
+    <script>
+        function goToFaceLogin() {
+            const email = document.getElementById('email_field').value;
+            // On redirige vers la nouvelle page en passant l'email s'il est rempli
+            window.location.href = `/login/face_step?email=${encodeURIComponent(email)}`;
+        }
+    </script>
 {% endblock %}

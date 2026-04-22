@@ -78,13 +78,10 @@ def login():
             flash("Veuillez remplir tous les champs.", "error")
             return redirect(url_for('login'))
 
-        # 1. Chercher l'utilisateur dans la base de données
         response = users_table.get_item(Key={'email': email})
         user = response.get('Item')
 
-        # 2. Vérifier si l'utilisateur existe ET si le mot de passe correspond au hash
         if user and check_password_hash(user['password'], password):
-            # 3. Créer la session utilisateur
             session['user_email'] = user['email']
             flash("Connexion réussie !", "success")
             return redirect(url_for('index'))
@@ -92,8 +89,19 @@ def login():
             flash("Email ou mot de passe incorrect.", "error")
             return redirect(url_for('login'))
 
-    # Afficher le formulaire si c'est une requête GET
     return render_template('login.html')
+
+@app.route('/login/face_step')
+def login_face_page():
+    email = request.args.get('email', '')
+    return render_template('login_face.html', email=email)
+
+# --- ROUTE : TRAITEMENT IA (Toujours la même) ---
+@app.route('/login/face', methods=['POST'])
+def login_face_api():
+    data = request.get_json()
+    email = data.get('email')
+    photo_live_b64 = data.get('photo_base64')
 
 # --- ROUTE : DÉCONNEXION ---
 @app.route('/logout')

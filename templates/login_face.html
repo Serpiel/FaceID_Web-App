@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div style="text-align: center;">
+        <h2>Vérification Faciale</h2>
+        <p>Utilisateur : <strong>{{ email if email else "Non spécifié" }}</strong></p>
+        
+        {% if not email %}
+            <div style="margin-bottom: 20px;">
+                <label>Veuillez confirmer votre email :</label><br>
+                <input type="email" id="face_email" value="{{ email }}" required>
+            </div>
+        {% else %}
+            <input type="hidden" id="face_email" value="{{ email }}">
+        {% endif %}
+
+        <div style="position: relative; display: inline-block;">
+            <video id="video" width="400" height="300" autoplay playsinline style="border-radius: 10px; border: 3px solid #2196F3;"></video>
+            <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
+        </div>
+        
+        <br><br>
+        <button id="capture_btn" style="padding: 15px 30px; font-size: 16px; cursor: pointer; background-color: #2196F3; color: white; border: none; border-radius: 5px;">
+            Scanner mon visage
+        </button>
+        
+        <p id="status_msg" style="margin-top: 20px; font-weight: bold;"></p>
+        <a href="{{ url_for('login') }}">Retour à la connexion classique</a>
+    </div>
+
+    <script>
+        // Logique JS identique à la précédente pour capturer et envoyer via fetch()
+        // ... (getUserMedia, capture du canvas, fetch vers '/login/face')
+    </script>
+{% endblock %}
