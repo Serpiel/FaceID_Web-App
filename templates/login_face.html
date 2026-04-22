@@ -29,7 +29,66 @@
     </div>
 
     <script>
-        // Logique JS identique à la précédente pour capturer et envoyer via fetch()
-        // ... (getUserMedia, capture du canvas, fetch vers '/login/face')
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('capture_btn');
+        const statusMsg = document.getElementById('status_msg');
+        const emailInput = document.getElementById('face_email');
+
+        // 1. Demander l'accès et allumer la webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(err => {
+                console.error("Erreur webcam: ", err);
+                statusMsg.style.color = "red";
+                statusMsg.innerText = "Impossible d'accéder à la caméra. Vérifiez les permissions du navigateur.";
+            });
+
+        // 2. Action au clic sur le bouton "Scanner mon visage"
+        captureBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            if (!email) {
+                alert("L'email est requis pour vous identifier !");
+                return;
+            }
+
+            // Afficher le chargement
+            statusMsg.style.color = "blue";
+            statusMsg.innerText = "Analyse en cours... Veuillez patienter.";
+            captureBtn.disabled = true; // Empêche de cliquer 10 fois
+
+            // Prendre la photo en arrière-plan
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, 400, 300);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+
+            // Envoyer la photo à notre route Python '/login/face'
+            fetch('/login/face', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, photo_base64: dataUrl })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    statusMsg.style.color = "green";
+                    statusMsg.innerText = "Succès ! Connexion réussie...";
+                    window.location.href = "/"; // On redirige vers l'accueil
+                } else {
+                    statusMsg.style.color = "red";
+                    statusMsg.innerText = data.message;
+                    captureBtn.disabled = false; // On débloque le bouton pour réessayer
+                }
+            })
+            .catch(err => {
+                console.error("Erreur serveur:", err);
+                statusMsg.style.color = "red";
+                statusMsg.innerText = "Erreur de communication avec le serveur.";
+                captureBtn.disabled = false;
+            });
+        });
     </script>
 {% endblock %}

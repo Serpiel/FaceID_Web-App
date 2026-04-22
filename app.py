@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import uuid
 import base64
+from face_auth import verifier_visage
 import os
 from dotenv import load_dotenv
 
@@ -97,12 +98,36 @@ def login_face_page():
     return render_template('login_face.html', email=email)
 
 # --- ROUTE : TRAITEMENT IA (Toujours la même) ---
+# --- ROUTE : CONNEXION FACIALE ---
 @app.route('/login/face', methods=['POST'])
-def login_face_api():
+def login_face():
+    # 1. Récupérer les données envoyées par le JavaScript
     data = request.get_json()
     email = data.get('email')
     photo_live_b64 = data.get('photo_base64')
 
+    if not email or not photo_live_b64:
+        return jsonify({"success": False, "message": "Email ou photo manquant."})
+
+    # 2. Chercher l'utilisateur dans DynamoDB
+    response = users_table.get_item(Key={'email': email})
+    user = response.get('Item')
+
+    if not user:
+        return jsonify({"success": False, "message": "Cet utilisateur n'existe pas."})
+    
+    if not user.get('photo_path'):
+        return jsonify({"success": False, "message": "Aucun visage enregistré pour ce compte."})
+
+    # 3. Comparer les visages via notre fichier face_auth.py
+    is_match, msg = verifier_visage(email, photo_live_b64, user['photo_path'])
+
+    if is_match:
+        # Connecter l'utilisateur
+        session['user_email'] = email
+        return jsonify({"success": True, "message": msg})
+    else:
+        return jsonify({"success": False, "message": msg})
 # --- ROUTE : DÉCONNEXION ---
 @app.route('/logout')
 def logout():
