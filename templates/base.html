@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon App AWS</title>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('index') }}">Accueil</a> | 
+        
+        {% if session.get('user_email') %}
+            <span style="color: blue;">Connecté en tant que {{ session['user_email'] }}</span> | 
+            <a href="{{ url_for('logout') }}">Se déconnecter</a>
+            
+        {% else %}
+            <a href="{{ url_for('register') }}">S'inscrire</a> | 
+            <a href="{{ url_for('login') }}">Se connecter</a>
+        {% endif %}
+    </nav>
+    <hr>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li style="color:{% if category == 'error' %}red{% else %}green{% endif %};">
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+</body>
+</html>

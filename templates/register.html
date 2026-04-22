@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Créer un compte avec Reconnaissance Faciale</h2>
+    
+    <form id="registerForm" method="POST" action="{{ url_for('register') }}">
+        <div>
+            <label for="email">Email :</label><br>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <br>
+        <div>
+            <label for="password">Mot de passe :</label><br>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <br>
+        <div>
+            <label for="password_confirm">Confirmer le mot de passe :</label><br>
+            <input type="password" id="password_confirm" name="password_confirm" required>
+        </div>
+
+        <div>
+            <label>Photo de référence :</label><br>
+            <video id="video" width="320" height="240" autoplay style="border: 1px solid black;"></video>
+            <canvas id="canvas" width="320" height="240" style="display:none; border: 1px solid green;"></canvas>
+            <br>
+            <button type="button" id="snapButton">Prendre la photo</button>
+            <span id="photoStatus" style="color: red;"> Photo requise</span>
+        </div>
+        
+        <input type="hidden" id="photo_base64" name="photo_base64" required>
+        
+        <br><br>
+        <button type="submit" id="submitBtn" disabled>S'inscrire</button>
+    </form>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snapButton = document.getElementById('snapButton');
+        const photoBase64Input = document.getElementById('photo_base64');
+        const submitBtn = document.getElementById('submitBtn');
+        const photoStatus = document.getElementById('photoStatus');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Erreur d'accès à la webcam: ", err);
+                alert("Veuillez autoriser l'accès à la webcam pour vous inscrire.");
+            });
+
+        snapButton.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, 320, 240);
+            
+            video.style.display = "none";
+            canvas.style.display = "block";
+            
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            photoBase64Input.value = dataUrl;
+
+            photoStatus.style.color = "green";
+            photoStatus.innerText = " Photo capturée !";
+            snapButton.innerText = "Reprendre la photo";
+            submitBtn.disabled = false;
+
+            snapButton.onclick = () => {
+                video.style.display = "block";
+                canvas.style.display = "none";
+                photoBase64Input.value = "";
+                photoStatus.style.color = "red";
+                photoStatus.innerText = " Photo requise";
+                submitBtn.disabled = true;
+
+                snapButton.addEventListener('click', arguments.callee);
+            };
+        });
+    </script>
+{% endblock %}
