@@ -3,36 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon App AWS</title>
+    <title>Mon App de Biométrie</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    
     <nav>
-        <a href="{{ url_for('index') }}">Accueil</a> | 
+        <a href="{{ url_for('index') }}">Accueil</a>
         
         {% if session.get('user_email') %}
-            <span style="color: blue;">Connecté en tant que {{ session['user_email'] }}</span> | 
+            <span>👤 {{ session['user_email'] }}</span>
             <a href="{{ url_for('logout') }}">Se déconnecter</a>
-            
         {% else %}
-            <a href="{{ url_for('register') }}">S'inscrire</a> | 
+            <a href="{{ url_for('register') }}">S'inscrire</a>
             <a href="{{ url_for('login') }}">Se connecter</a>
         {% endif %}
     </nav>
-    <hr>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
+    <div class="alert-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
             <ul>
-                {% for category, message in messages %}
-                    <li style="color:{% if category == 'error' %}red{% else %}green{% endif %};"> <!-- Ignorer les erreurs, c'est que de la syntaxe, CSS pète un peu un câble-->
-                        {{ message }}
-                    </li>
-                {% endfor %}
+            {% for category, message in messages %}
+              <li class="alert {{ category }}">{{ message }}</li>
+            {% endfor %}
             </ul>
-        {% endif %}
-    {% endwith %}
+          {% endif %}
+        {% endwith %}
+    </div>
 
-    {% block content %}{% endblock %}
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
 
 </body>
 </html>
